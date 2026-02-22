@@ -1,0 +1,129 @@
+import { useRef, useEffect, useState } from "react";
+import { MessageCircle, ArrowDown } from "lucide-react";
+import GetDifferenceTimeLabel from "@/utils/GetDifferenceTimeLabel";
+import { Id } from "../../../convex/_generated/dataModel";
+
+interface Message 
+{
+    _id: Id<"messages">;
+    content: string;
+    from: string;
+    _creationTime: number;
+}
+
+interface MessageListProps 
+{
+    messages: Message[] | undefined;
+    currentUserId: string | undefined;
+    isOtherUserTyping: boolean;
+}
+
+export default function MessageList({ messages, currentUserId, isOtherUserTyping }: MessageListProps) 
+{
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const prevMessagesLength = useRef<number>(0);
+    const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
+
+    useEffect(() => 
+    {
+        if (!messages || !scrollContainerRef.current) return;
+
+        const container = scrollContainerRef.current;
+
+        if (prevMessagesLength.current === 0 && messages.length > 0) 
+            container.scrollTop = container.scrollHeight;
+        else if (messages.length > prevMessagesLength.current) 
+        {
+            const isScrolledUp = container.scrollHeight - container.scrollTop - container.clientHeight > 100;
+
+            if (isScrolledUp)
+                setShowScrollButton(true);
+            else
+            {
+                container.scrollTop = container.scrollHeight;
+                setShowScrollButton(false);
+            }
+        }
+
+        prevMessagesLength.current = messages.length;
+
+    }, [messages]);
+
+    function handleScroll()
+    {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
+        if (isAtBottom) setShowScrollButton(false);
+    };
+
+    function scrollToBottom()
+    {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        setShowScrollButton(false);
+    };
+
+    return (
+        <div className="flex-1 w-full relative min-h-0">
+            <div className="w-full h-full flex gap-8 flex-col overflow-y-auto pb-4" ref={scrollContainerRef} onScroll={handleScroll}>
+                {messages?.length == 0 ? <NoConversations/> : <Messages messages={messages} currentUserId={currentUserId}/>}
+                {isOtherUserTyping && <TypingBubbles/>}
+            </div>
+            {showScrollButton && <ScrollButton scrollToBottom={scrollToBottom}/>}
+        </div>
+    );
+}
+
+function ScrollButton({scrollToBottom}: { scrollToBottom: () => void})
+{
+    return (
+        <button onClick={scrollToBottom} className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all z-10">
+            <ArrowDown size={16} />
+            <span className="text-sm font-medium">New Messages</span>
+        </button>
+    )
+}
+
+function NoConversations()
+{
+    return (
+        <div className="w-full h-full flex flex-col gap-4 justify-center items-center">
+            <MessageCircle fill="white" size={75} />
+            <p className="text-2xl font-semibold">
+                No Conversations Yet !
+            </p>
+        </div>
+    );
+}
+
+function TypingBubbles()
+{
+    return (
+        <div className={`w-full min-h-12 flex justify-center flex-col px-3 items-start`}>
+            <div className="bg-gray-800 flex justify-center gap-1 items-center p-3 rounded">
+                <div className="bg-white rounded-full w-3 animate-bounce delay-0 h-3"></div>
+                <div className="bg-white rounded-full w-3 animate-bounce delay-200 h-3"></div>
+                <div className="bg-white rounded-full w-3 animate-bounce delay-400 h-3"></div>
+            </div>
+        </div>
+    )
+}
+
+function Messages({messages, currentUserId} : { messages: Message[] | undefined, currentUserId: string | undefined})
+{
+    function Message(message: Message)
+    {
+        return (
+            <div key={message._id} className={`w-full min-h-12 flex justify-center flex-col px-3 ${message.from == currentUserId ? "items-end" : "items-start"}`}>
+                <p className={`${message.from == currentUserId ? "bg-indigo-900" : "bg-gray-800"} p-3 rounded`}>{message.content}</p>
+                <p className="text-xs text-white/30 mt-1">{GetDifferenceTimeLabel(message._creationTime)}</p>
+            </div>
+        )
+    }
+
+    return messages?.map((message) => Message(message))
+}
