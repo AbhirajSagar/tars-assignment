@@ -66,6 +66,19 @@ export const getLatestMessage = query
     }
 })
 
+export const softDeleteMessage = mutation
+({
+    args: {messageId: v.id('messages')},
+    handler: async(ctx, args) =>
+    {
+        const message = await ctx.db.get(args.messageId);
+        if (!message) return;
+
+        if (message.deleted) return;
+        await ctx.db.patch(args.messageId, { deleted: true });
+    }
+})
+
 export const createNewMessage = mutation
 ({
     args: {
@@ -82,7 +95,8 @@ export const createNewMessage = mutation
             from: args.from,
             to: args.to,
             conversationId: args.conversationId,
-            read: false
+            read: false,
+            deleted: false
         });
 
         // Need to clear the is typing status when message is sent

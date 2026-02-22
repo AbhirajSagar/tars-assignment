@@ -15,6 +15,7 @@ export default defineSchema(
         to: v.string(),
         read: v.boolean(),
         conversationId: v.id("conversations"),
+        deleted: v.boolean()
     }),
     users: defineTable(
     {

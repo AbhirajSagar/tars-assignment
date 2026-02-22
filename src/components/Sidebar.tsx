@@ -3,7 +3,7 @@ import GetDifferenceTimeLabel from "@/utils/GetDifferenceTimeLabel";
 import { Clock } from "lucide-react";
 import { type ConversationsData } from "@/types/ConversationsData";
 
-export default function Sidebar({ conversations, curConversationId, to_user, to_user_name } : { conversations: ConversationsData[], curConversationId: string, to_user: string, to_user_name: string})
+export default function Sidebar({ conversations, curConversationId } : { conversations: ConversationsData[], curConversationId: string})
 {
     return (
         <div className="w-2xl h-full bg-gray-900 border-r relative overflow-y-auto border-gray-700">
@@ -27,7 +27,7 @@ export default function Sidebar({ conversations, curConversationId, to_user, to_
 
                         <div className="flex justify-between items-center w-full">
                             <p className="text-sm text-white/60 truncate w-3/4">
-                                { conversation?.latestMessage ? conversation.latestMessage.content : "No Messages Available" }
+                                { conversation?.latestMessage ? (conversation.latestMessage.deleted ? 'This message was deleted' : conversation.latestMessage.content) : "No Messages Available" }
                             </p>
                             {conversation.unreadCount > 0 && (
                                 <div className="bg-red-600 text-white text-xs font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1">

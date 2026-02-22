@@ -9,6 +9,7 @@ export type ConversationsData =
         from: string;
         to: string;
         conversationId: Id<"conversations">;
+        deleted: boolean;
     } | null,
     _id: Id<"conversations">, 
     _creationTime: number,

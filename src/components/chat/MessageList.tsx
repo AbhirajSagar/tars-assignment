@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { MessageCircle, ArrowDown } from "lucide-react";
+import { MessageCircle, ArrowDown, Trash } from "lucide-react";
 import GetDifferenceTimeLabel from "@/utils/GetDifferenceTimeLabel";
 import { Id } from "../../../convex/_generated/dataModel";
 
@@ -9,16 +9,18 @@ interface Message
     content: string;
     from: string;
     _creationTime: number;
+    deleted: boolean;
 }
 
 interface MessageListProps 
 {
     messages: Message[] | undefined;
     currentUserId: string | undefined;
+    deleteMessage: (messageId: Id<"messages">) => void;
     isOtherUserTyping: boolean;
 }
 
-export default function MessageList({ messages, currentUserId, isOtherUserTyping }: MessageListProps) 
+export default function MessageList({ messages, deleteMessage, currentUserId, isOtherUserTyping }: MessageListProps) 
 {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const prevMessagesLength = useRef<number>(0);
@@ -69,11 +71,11 @@ export default function MessageList({ messages, currentUserId, isOtherUserTyping
 
     return (
         <div className="flex-1 w-full relative min-h-0">
-            <div className="w-full h-full flex gap-8 flex-col overflow-y-auto pb-4" ref={scrollContainerRef} onScroll={handleScroll}>
-                {messages?.length == 0 ? <NoConversations/> : <Messages messages={messages} currentUserId={currentUserId}/>}
-                {isOtherUserTyping && <TypingBubbles/>}
+            <div className="w-full h-full flex gap-4 flex-col overflow-y-scroll pb-4" ref={scrollContainerRef} onScroll={handleScroll}>
+                {messages?.length === 0 ? <NoConversations /> : <Messages deleteMessage={deleteMessage} messages={messages} currentUserId={currentUserId} />}
+                {isOtherUserTyping && <TypingBubbles />}
             </div>
-            {showScrollButton && <ScrollButton scrollToBottom={scrollToBottom}/>}
+            {showScrollButton && <ScrollButton scrollToBottom={scrollToBottom} />}
         </div>
     );
 }
@@ -113,17 +115,50 @@ function TypingBubbles()
     )
 }
 
-function Messages({messages, currentUserId} : { messages: Message[] | undefined, currentUserId: string | undefined})
+function MessageItem({ message, deleteMessage, currentUserId }: { message: Message, deleteMessage: (id: Id<"messages">) => void, currentUserId: string | undefined }) 
 {
-    function Message(message: Message)
-    {
-        return (
-            <div key={message._id} className={`w-full min-h-12 flex justify-center flex-col px-3 ${message.from == currentUserId ? "items-end" : "items-start"}`}>
-                <p className={`${message.from == currentUserId ? "bg-indigo-900" : "bg-gray-800"} p-3 rounded`}>{message.content}</p>
-                <p className="text-xs text-white/30 mt-1">{GetDifferenceTimeLabel(message._creationTime)}</p>
-            </div>
-        )
-    }
+    const isMe = message.from === currentUserId;
 
-    return messages?.map((message) => Message(message))
+    return (
+        <div className={`w-full flex flex-col px-3 ${isMe ? "items-end" : "items-start"}`}>
+            <div className="flex items-end gap-2">
+                {!message.deleted && isMe && 
+                (
+                    <Trash 
+                        onClick={() => deleteMessage(message._id)} 
+                        className="bg-gray-800 cursor-pointer hover:bg-gray-950 text-white/50 p-3 box-border h-12 w-12 rounded flex-shrink-0"
+                    />
+                )}
+                
+                <p className={`${isMe ? "bg-indigo-900" : "bg-gray-800"} p-3 max-w-xs break-words whitespace-pre-wrap rounded`}>
+                    {message.deleted ? 'This message was deleted' : message.content}
+                </p>
+                
+            </div>
+
+            <p className="text-xs text-white/30 mt-1">
+                {GetDifferenceTimeLabel(message._creationTime)}
+            </p>
+        </div>
+    );
+}
+
+function Messages({ messages, deleteMessage, currentUserId }: { messages: Message[] | undefined, deleteMessage: (messageId: Id<"messages">) => void, currentUserId: string | undefined }) 
+{
+    
+    if (!messages) return null;
+
+    return (
+        <>
+            {messages.map((message) => 
+            (
+                <MessageItem 
+                    key={message._id} 
+                    message={message} 
+                    deleteMessage={deleteMessage} 
+                    currentUserId={currentUserId} 
+                />
+            ))}
+        </>
+    );
 }

@@ -31,6 +31,7 @@ export default function Page()
 
     const sendMessageMut = useMutation(api.messages.createNewMessage);
     const markReadMut = useMutation(api.messages.markAllMessagesRead);
+    const deleteMessageMut = useMutation(api.messages.softDeleteMessage);
     const updateTypingStatusMut = useMutation(api.conversations.updateTypingStatus);
 
     useEffect(() => 
@@ -62,6 +63,11 @@ export default function Page()
             updateTypingStatusMut({ conversationId: id as Id<"conversations">, clerk_id: user.id });
     }
 
+    async function deleteMessage(messageId: Id<"messages">)
+    {
+        await deleteMessageMut({ messageId: messageId as Id<"messages"> });
+    }
+
     if (!conversations) return null;
 
     const currentConversation = conversations.find(c => c._id === id);
@@ -69,11 +75,11 @@ export default function Page()
 
     return (
         <div className="w-full h-[calc(100vh-4rem)] flex justify-center items-center">
-            <Sidebar conversations={conversations} curConversationId={id} to_user={to_user} to_user_name={to_user_name} />
+            <Sidebar conversations={conversations} curConversationId={id}/>
             <div className={`w-full absolute md:static top-16 left-0 grow h-full bg-gray-900 ${conversationVisible ? "flex" : "hidden md:flex"}`}>
                 <div className="w-full h-full flex flex-col justify-between relative">
                     <ChatHeader to_user_name={to_user_name} onBack={() => setConversationVisible(false)}/>
-                    <MessageList messages={messages} currentUserId={user?.id} isOtherUserTyping={isOtherUserTyping}/>
+                    <MessageList messages={messages} currentUserId={user?.id} deleteMessage={deleteMessage} isOtherUserTyping={isOtherUserTyping}/>
                     <MessageInput message={message} onChange={handleMessageChange} onSend={handleMessageSending}/>
                 </div>
             </div>
