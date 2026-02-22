@@ -126,11 +126,11 @@ function MessageItem({ message, deleteMessage, currentUserId }: { message: Messa
                 (
                     <Trash 
                         onClick={() => deleteMessage(message._id)} 
-                        className="bg-gray-800 cursor-pointer hover:bg-gray-950 text-white/50 p-3 box-border h-12 w-12 rounded flex-shrink-0"
+                        className="bg-gray-800 cursor-pointer hover:bg-gray-950 text-white/50 p-3 box-border h-12 w-12 rounded shrink-0"
                     />
                 )}
                 
-                <p className={`${isMe ? "bg-indigo-900" : "bg-gray-800"} p-3 max-w-xs break-words whitespace-pre-wrap rounded`}>
+                <p className={`${isMe ? "bg-indigo-900" : "bg-gray-800"} p-3 max-w-xs wrap-break-word whitespace-pre-wrap rounded`}>
                     {message.deleted ? 'This message was deleted' : message.content}
                 </p>
                 
@@ -145,7 +145,6 @@ function MessageItem({ message, deleteMessage, currentUserId }: { message: Messa
 
 function Messages({ messages, deleteMessage, currentUserId }: { messages: Message[] | undefined, deleteMessage: (messageId: Id<"messages">) => void, currentUserId: string | undefined }) 
 {
-    
     if (!messages) return null;
 
     return (

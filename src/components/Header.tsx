@@ -14,7 +14,7 @@ function Logo()
 {
     return (
         <div>
-            <h1 className="text-xl sm:text-2xl font-bold font-outfit text-indigo-600">
+            <h1 className="text-xl sm:text-2xl font-bold font-outfit from-indigo-400 to-indigo-600 bg-linear-to-b bg-clip-text text-transparent">
                 CONVEX 
                 <span className='text-white/70 text-sm'> Chat</span>
             </h1>
