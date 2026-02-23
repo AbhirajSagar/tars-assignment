@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export function useNow(updateInterval: number = 1000) 
+export function useNow(updateInterval: number = 1000)
 {
     const [now, setNow] = useState(() => Date.now());
 

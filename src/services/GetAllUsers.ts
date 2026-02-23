@@ -11,10 +11,7 @@ export default async function GetAllUsers()
     const usersWithPics = fetchedUsers.map(u => 
     {
         const cUser = clerkUsers.data.find(c => c.id === u.clerk_id);
-        return {
-            ...u,
-            profileImageUrl: cUser?.imageUrl || null
-        };
+        return { ...u, profileImageUrl: cUser?.imageUrl || null};
     });
 
     return usersWithPics;

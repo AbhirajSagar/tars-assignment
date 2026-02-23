@@ -7,17 +7,13 @@ import { useRouter } from "next/navigation";
 import { useMutation, useConvex } from "convex/react";
 import { api } from '../../convex/_generated/api';
 import PresenceProvider from "./PresenceProvider";
+import { useNow } from "@/hooks/useNow";
 
 export default function UsersListPage({ users, curUserId } : { users: UserData[], curUserId: string })
 {
     const [search, setSearch] = useState<string>('');
-    const [now] = useState(() => Date.now())
-    const [filteredUsers] = useState(users.filter(user =>
-    (
-        user.firstName?.toLowerCase().includes(search.toLowerCase()) ||
-        user.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-        user.email.toLowerCase().includes(search.toLowerCase())
-    )));
+    const now = useNow()
+    const [filteredUsers, setFilteredUsers] = useState(users);
 
     const createConversationMut = useMutation(api.conversations.createNewConversation);
     const convex = useConvex();
@@ -26,6 +22,21 @@ export default function UsersListPage({ users, curUserId } : { users: UserData[]
     function updateSearch(e: React.ChangeEvent<HTMLInputElement>)
     {
         setSearch(e.target.value);
+        
+        if(e.target.value === '')
+        {
+            setFilteredUsers(users);
+            return;
+        }
+            
+        const filteredUsersBySearch = users.filter(user =>
+        (
+            user.firstName?.toLowerCase().includes(search.toLowerCase()) ||
+            user.lastName?.toLowerCase().includes(search.toLowerCase()) ||
+            user.email.toLowerCase().includes(search.toLowerCase())
+        ));
+
+        setFilteredUsers(filteredUsersBySearch);
     }
 
     async function createConversation(user_id: string, user_name: string)

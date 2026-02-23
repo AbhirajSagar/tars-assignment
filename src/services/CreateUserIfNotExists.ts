@@ -14,6 +14,5 @@ export default async function CreateUserIfNotExists(user: UserData)
         email: user.email,
     });
     
-    console.log('Created New user')
     return createdUser;
 }
