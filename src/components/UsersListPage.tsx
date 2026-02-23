@@ -101,7 +101,7 @@ function ResultArea({filteredUsers, search, createConversation, openLastConversa
         (
             <div key={user.id} className="w-full relative cursor-pointer shadow-xl outline-gray-700 duration-150 rounded-lg mb-2 bg-gray-800 px-4 py-3">
                 <div className="mb-5 flex justify-center items-center flex-col">
-                    <img alt="Profile Picture" src={user.profileImageUrl} className="w-25 h-25 rounded-full mb-2"/>
+                    <img alt="Profile Picture" src={user.profileImageUrl ?? '/default-avatar.jpg'} className="w-25 h-25 rounded-full mb-2"/>
                     <Name user={user}/>
                     <HighlightedText text={user.email} term={search} className='text-sm text-white/50 text-center w-full'/>
                 </div>
